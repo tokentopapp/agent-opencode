@@ -11,7 +11,11 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "LICENSE", "README.md"],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "bun run build:types && bun run build:js",
     "build:types": "tsc --emitDeclarationOnly",
@@ -21,7 +25,15 @@
     "clean": "rm -rf dist",
     "prepublishOnly": "bun run clean && bun run build"
   },
-  "keywords": ["tokentop", "plugin", "agent", "opencode", "ai", "llm", "token-usage"],
+  "keywords": [
+    "tokentop",
+    "plugin",
+    "agent",
+    "opencode",
+    "ai",
+    "llm",
+    "token-usage"
+  ],
   "author": "Nigel Bazzeghin <nbazzeghin@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -33,13 +45,16 @@
     "registry": "https://registry.npmjs.org/"
   },
   "homepage": "https://github.com/tokentopapp/tokentop",
-  "engines": { "bun": ">=1.0.0" },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
   "peerDependencies": {
     "@tokentop/plugin-sdk": "^1.0.0"
   },
   "devDependencies": {
-    "@tokentop/plugin-sdk": "file:../plugin-sdk",
+    "@tokentop/plugin-sdk": "^1.0.1",
     "@types/bun": "latest",
+    "semantic-release": "^25.0.3",
     "typescript": "^5.7.0"
   }
 }

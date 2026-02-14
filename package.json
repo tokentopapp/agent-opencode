@@ -1,0 +1,45 @@
+{
+  "name": "@tokentop/agent-opencode",
+  "version": "1.0.0",
+  "description": "OpenCode coding agent plugin for tokentop — session parsing, credential reading, and real-time activity tracking",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "LICENSE", "README.md"],
+  "scripts": {
+    "build": "bun run build:types && bun run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "bun build src/index.ts --outdir dist --target node --format esm --packages external",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build"
+  },
+  "keywords": ["tokentop", "plugin", "agent", "opencode", "ai", "llm", "token-usage"],
+  "author": "Nigel Bazzeghin <nbazzeghin@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tokentopapp/agent-opencode.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "homepage": "https://github.com/tokentopapp/tokentop",
+  "engines": { "bun": ">=1.0.0" },
+  "peerDependencies": {
+    "@tokentop/plugin-sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@tokentop/plugin-sdk": "file:../plugin-sdk",
+    "@types/bun": "latest",
+    "typescript": "^5.7.0"
+  }
+}

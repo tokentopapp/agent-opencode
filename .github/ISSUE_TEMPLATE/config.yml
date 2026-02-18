@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a bug
+    url: https://github.com/tokentopapp/tokentop/issues/new?template=bug_report.yml&labels=bug,agent-opencode
+    about: File bugs against the main tokentop repo (tagged with agent-opencode)
+  - name: Request a feature
+    url: https://github.com/tokentopapp/tokentop/issues/new?template=feature_request.yml&labels=enhancement,agent-opencode
+    about: Suggest features in the main tokentop repo (tagged with agent-opencode)
+  - name: Documentation
+    url: https://github.com/tokentopapp/tokentop/tree/main/docs
+    about: Check the docs before filing an issue

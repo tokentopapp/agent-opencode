@@ -7,7 +7,13 @@ import type {
   SessionParseOptions,
   SessionUsageData,
 } from '@tokentop/plugin-sdk';
-import { CACHE_TTL_MS, evictSessionAggregateCache, sessionAggregateCache, sessionCache } from './cache.ts';
+import {
+  CACHE_TTL_MS,
+  evictSessionAggregateCache,
+  invalidateSessionCaches,
+  sessionAggregateCache,
+  sessionCache,
+} from './cache.ts';
 import { OPENCODE_DB_PATH } from './paths.ts';
 import type {
   JoinedMessageRow,
@@ -313,6 +319,8 @@ export function startActivityWatchSqlite(callback: ActivityCallback): void {
         if (partData.tokens.reasoning !== undefined) tokens.reasoning = partData.tokens.reasoning;
         if (partData.tokens.cache?.read !== undefined) tokens.cacheRead = partData.tokens.cache.read;
         if (partData.tokens.cache?.write !== undefined) tokens.cacheWrite = partData.tokens.cache.write;
+
+        invalidateSessionCaches(row.session_id);
 
         sqliteActivity.callback({
           sessionId: row.session_id,

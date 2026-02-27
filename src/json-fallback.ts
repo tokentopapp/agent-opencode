@@ -8,7 +8,14 @@ import type {
   SessionParseOptions,
   SessionUsageData,
 } from '@tokentop/plugin-sdk';
-import { CACHE_TTL_MS, evictSessionAggregateCache, sessionAggregateCache, sessionCache, sessionMetadataIndex } from './cache.ts';
+import {
+  CACHE_TTL_MS,
+  evictSessionAggregateCache,
+  invalidateSessionCaches,
+  sessionAggregateCache,
+  sessionCache,
+  sessionMetadataIndex,
+} from './cache.ts';
 import { OPENCODE_MESSAGES_PATH, OPENCODE_PARTS_PATH, OPENCODE_SESSIONS_PATH, OPENCODE_STORAGE_PATH } from './paths.ts';
 import type { OpenCodeMessage, OpenCodePart, OpenCodeSession } from './types.ts';
 import { readJsonFile } from './utils.ts';
@@ -55,6 +62,8 @@ export async function processPartFile(partPath: string): Promise<void> {
   if (part.tokens.reasoning !== undefined) tokens.reasoning = part.tokens.reasoning;
   if (part.tokens.cache?.read !== undefined) tokens.cacheRead = part.tokens.cache.read;
   if (part.tokens.cache?.write !== undefined) tokens.cacheWrite = part.tokens.cache.write;
+
+  invalidateSessionCaches(part.sessionID);
 
   const update: ActivityUpdate = {
     sessionId: part.sessionID,

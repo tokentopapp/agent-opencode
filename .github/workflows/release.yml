@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+env:
+  BUN_VERSION: '1.2'
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Create git tag for draft release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          TAG="${{ steps.release.outputs.tag_name }}"
+          SHA="${{ steps.release.outputs.sha }}"
+          if gh api "repos/${{ github.repository }}/git/ref/tags/${TAG}" --silent 2>/dev/null; then
+            echo "Tag ${TAG} already exists, skipping"
+          else
+            echo "Creating tag ${TAG} at ${SHA}"
+            gh api "repos/${{ github.repository }}/git/refs" \
+              --method POST \
+              -f "ref=refs/tags/${TAG}" \
+              -f "sha=${SHA}"
+          fi
+
+  publish-npm:
+    name: Publish to npm
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created && !contains(needs.release-please.outputs.tag_name, '-') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Publish
+        run: npm publish --provenance --access public
+
+  publish-release:
+    name: Publish Release
+    needs: [release-please, publish-npm]
+    runs-on: ubuntu-latest
+    if: always() && needs.release-please.outputs.release_created
+    steps:
+      - name: Publish draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${{ needs.release-please.outputs.tag_name }} --repo ${{ github.repository }} --draft=false

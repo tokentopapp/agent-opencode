@@ -35,3 +35,12 @@ export const sessionMetadataIndex = new Map<string, {
   mtimeMs: number;
   session: OpenCodeSession;
 }>();
+
+/**
+ * Invalidate caches for a specific session so the next parseSessions() call
+ * re-reads its messages. Called by the activity watcher when new parts arrive.
+ */
+export function invalidateSessionCaches(sessionId: string): void {
+  sessionAggregateCache.delete(sessionId);
+  sessionCache.lastCheck = 0;
+}

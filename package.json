@@ -1,6 +1,6 @@
 {
   "name": "@tokentop/agent-opencode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenCode coding agent plugin for tokentop — session parsing, credential reading, and real-time activity tracking",
   "type": "module",
   "main": "dist/index.js",

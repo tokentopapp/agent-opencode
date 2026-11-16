@@ -58,7 +58,9 @@ tests/                # Test directory (bun test runner, currently empty)
 
 ### Dual Storage Backend
 
-- **Primary**: SQLite (`opencode.db`) — opened read-only with prepared statements. Session and message tables are joined and queried with `json_extract()` for filtering assistant messages with token data.
+- **Primary**: SQLite (`opencode.db`) — opened read-only with prepared statements. Assistant messages with token data are selected and their usage fields projected with `json_extract()`; the message JSON itself is never loaded (2.x rows embed the full message content).
+- **Two SQLite layouts**: OpenCode 1.x writes `session` / `message` / `part`; OpenCode 2.x writes `session_v2` / `session_message`. `detectSchema()` checks which exist and both are read when both are present — late 1.x releases already create the 2.x tables, and the 2.x upgrade leaves the 1.x tables behind, so neither implies the other is unused. Sessions are merged by id (most recently updated copy wins, 2.x on ties) and messages are merged by id (2.x copy wins, 1.x-only messages are kept because the migration does not carry every message over).
+- **2.x message shape**: the role is the `session_message.type` column rather than `$.role`, and the model is `$.model.id` rather than `$.modelID`. Token, cost and time fields are unchanged.
 - **Fallback**: JSON files in the `storage/` directory hierarchy. Used when SQLite DB is absent or queries fail. Walks `session/` → `message/` directories to reconstruct usage data.
 - **Selection**: `parseSessions` tries SQLite first; if it returns empty results, falls back to JSON. `startActivityWatch` checks for an open DB handle to choose the watch strategy.
 
@@ -76,7 +78,8 @@ tests/                # Test directory (bun test runner, currently empty)
 
 ### Real-Time Activity Watching
 
-- **SQLite mode**: Polls the `part` table every 1s (`SQLITE_POLL_INTERVAL_MS`) for rows with `time_created` after the last seen timestamp. Emits `ActivityUpdate` for parts containing token data.
+- **SQLite mode (1.x)**: Polls the `part` table every 1s (`SQLITE_POLL_INTERVAL_MS`) for rows with `time_created` after the last seen timestamp. Emits `ActivityUpdate` for parts containing token data.
+- **SQLite mode (2.x)**: 2.x writes no token-bearing parts; tokens land on the assistant `session_message` row when the step finishes. `pollMessageActivity()` runs on the same 1s timer, reading assistant rows by the indexed `time_created` column. Its watermark trails the oldest message still in flight (no completion time, no error, younger than `MESSAGE_PENDING_MAX_AGE_MS`) so that row is re-read until its tokens appear; emitted rows are de-duplicated by `time_updated`.
 - **JSON mode**: FSWatcher on `storage/part/` for new `msg_*` directories. Each message directory gets its own watcher for new `.json` part files. Deduplicates via `seenParts` Set. 50ms debounce on part file processing.
 
 ### Credential Reading

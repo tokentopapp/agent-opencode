@@ -19,7 +19,7 @@
 
 This plugin reads OpenCode's local data to extract:
 
-- **Sessions** — parsed from SQLite database (`~/.local/share/opencode/opencode.db`) with automatic JSON fallback for older installs
+- **Sessions** — parsed from SQLite database (`~/.local/share/opencode/opencode.db`), covering both the OpenCode 1.x and OpenCode 2.x session tables, with automatic JSON fallback for older installs
 - **Credentials** — reads OAuth tokens and API keys from `~/.local/share/opencode/auth.json` and provider config from `~/.config/opencode/config.json`
 - **Provider discovery** — detects configured providers (Anthropic, OpenAI, Google Gemini, GitHub Copilot, OpenRouter, Antigravity, OpenCode Zen)
 - **Real-time monitoring** — watches for session file changes to update the dashboard live

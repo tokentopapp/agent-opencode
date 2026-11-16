@@ -88,12 +88,30 @@ export interface SessionRow {
   time_updated: number;
 }
 
-export interface JoinedMessageRow {
-  sid: string;
-  title: string;
-  directory: string;
+export interface MessageUsageRow {
+  id: string;
+  session_id: string;
+  provider_id: string | null;
+  model_id: string | null;
+  tokens_input: number | null;
+  tokens_output: number | null;
+  cache_read: number | null;
+  cache_write: number | null;
+  timestamp: number;
+}
+
+export interface MessageActivityRow {
+  id: string;
+  session_id: string;
+  time_created: number;
   time_updated: number;
-  data: string;
+  tokens_input: number | null;
+  tokens_output: number | null;
+  tokens_reasoning: number | null;
+  cache_read: number | null;
+  cache_write: number | null;
+  time_completed: number | null;
+  errored: number;
 }
 
 export interface PartRow {
@@ -106,14 +124,26 @@ export interface PartRow {
 
 export type Stmt = ReturnType<InstanceType<typeof Database>['prepare']>;
 
-export interface PreparedStatements {
+export interface SqliteSchema {
+  v1: boolean;
+  v1Parts: boolean;
+  v2: boolean;
+}
+
+export interface SourceStatements {
   allSessions: Stmt;
   sessionsSince: Stmt;
   oneSession: Stmt;
   sessionMessages: Stmt;
-  uncachedMessages: Stmt;
-  uncachedMessagesSince: Stmt;
-  recentParts: Stmt;
+  allMessages: Stmt;
+}
+
+export interface PreparedStatements {
+  schema: SqliteSchema;
+  v1: SourceStatements | null;
+  v2: SourceStatements | null;
+  recentParts: Stmt | null;
+  recentMessages: Stmt | null;
 }
 
 export interface SessionAggregateCacheEntry {
